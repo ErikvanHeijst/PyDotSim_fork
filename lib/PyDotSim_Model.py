@@ -118,13 +118,25 @@ def createXYZ():
 def cellQD(QDpara, pos):
     inQD = False
     QDshape = QDpara[0]
-    cx = pos[0]; cy = pos[1]; cz = pos[2]
-    # Ellipse, so far only sphere
+    cx = pos[0]
+    cy = pos[1]
+    cz = pos[2]
+    # Ellpisoid
     # idx_QD = ((X-x0)/Rx).^2 + ((Y-y0)/Ry).^2 + ((Z-z0)/Rz).^2 <= 1 ;
     if QDshape == 1:
-        rxQD = QDpara[1]; ryQD = QDpara[2]; rzQD = QDpara[3];
-        cr = np.sqrt(cx**2 + cy**2 + cz**2);
-        if cr <= rxQD: inQD = True
+        rxQD = QDpara[1]
+        ryQD = QDpara[2]
+        rzQD = QDpara[3]
+        if rxQD == ryQD == rzQD:
+            cr = np.sqrt(cx**2 + cy**2 + cz**2)
+            if cr <= rxQD:
+                inQD = True
+        else:
+            cr = np.sqrt(
+                (cx / (2 * rxQD)) ** 2 + (cy / (2 * ryQD)) ** 2 + (cz / (2 * rzQD)) ** 2
+            )
+            if cr <= 0.5:
+                inQD = True
     # Disk, r1: r, r2: h
     if QDshape == 2:
         rQD = QDpara[1]; hQD = QDpara[2]
