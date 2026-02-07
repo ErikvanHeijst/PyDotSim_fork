@@ -63,6 +63,48 @@ class Material:
         return band_gap
 
 
+@dataclass
+class Alloy:
+    host: Material
+    guest: Material
+    x: float  # composition
+    C: float  # bowing parameter
+    name: str = "InGaAs"
+
+    def _bandgap(self):
+        alloy_bandgap = (
+            (1 - self.x) * self.host.band_gap
+            + self.x * self.guest.band_gap
+            - self.x * (1 - self.x) * self.C
+        )
+
+        return alloy_bandgap
+
+    def _effective_mass(self):
+        if self.name == "AlGaAs":
+            alloy_electron_mass = 0.067 + 0.057 * self.x
+            alloy_hole_mass = 0.51 + 0.25 * self.x
+        if self.name == "InGaAs":
+            alloy_electron_mass = 0.024 + 0.035 * (1 - self.x) + 0.008(1 - self.x) ** 2
+            alloy_hole_mass = 0.53  # for 30% Indium
+        else:
+            raise ValueError("No such alloy name is recognized")
+
+        return alloy_electron_mass, alloy_hole_mass
+
+    def _bandgap_discontuity(self):
+        if self.name == "AlGaAs":
+            dE = self._bandgap - self.host.band_gap
+            f = 63 / 37
+            dEc = dE * f / (1 + f)
+            dEv = dE - dEc
+            return dEc, dEv
+        if self.name == "InGaAs":
+            pass
+        else:
+            raise ValueError("No such alloy name is recognized")
+
+
 if __name__ == "__main__":
     gallium_arsenide = Material(
         relative_electron_mass=0.067,
